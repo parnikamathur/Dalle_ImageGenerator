@@ -1,0 +1,144 @@
+.ai-image-generator{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    align-items: center;
+    margin-top: 80px;
+    margin-bottom: 20px;
+    gap: 30px;
+}
+
+.header{
+    font-size: 70px;
+    font-weight: 500;
+    padding-bottom: 30px;
+}
+
+.header span{
+    color: #de1b89;
+    font-weight: 600;
+}
+
+.img-loading{
+    display: flex;
+    flex-direction: column;
+}
+
+.img-loading img{
+    width: 512px;
+}
+
+.search-box{
+    display: flex;
+    width: 1000px;
+    height: 95px;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 50px;
+    background: #1f3540;
+}
+
+.search-input{
+    width: 600px;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    color: white;
+    padding-left: 35px;
+    margin-right: 35px;
+}
+
+.search-input::placeholder{
+    color: #999;
+}
+
+.generate-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 85px;
+    font-size: 20px;
+    border-radius: 50px;
+    background: #de1b89;
+    cursor: pointer;
+}
+
+.loading-bar{
+    width: 0px;
+    height: 8px;
+    background: #de1b89;
+}
+
+.loading-text{
+    font-size: 18px;
+}
+
+.loading-bar-full{
+    width: 512px;
+    height: 8px;
+    background: #de1b89;
+    transition: 15s;
+}
+
+.display-none{
+    display: none;
+}
+ 52 changes: 52 additions & 0 deletions52  
+Dalle_ImageGenerator/ImageGenerator.jsx
+Viewed
+@@ -0,0 +1,52 @@
+import React, { useRef, useState } from 'react'
+import './ImageGenerator.css'
+import default_image from '../Assests/default_image.jpg'
+
+export const ImageGenerator = () => {
+
+  const[image_url,setImage_url] = useState("/");
+  let inputRef=useRef(null);
+  const [loading,setLoading]=useState(false);
+
+  const imageGenerator = async() => {
+    if(inputRef.current.value===""){
+      return 0;
+    }
+    setLoading(true);
+    const response = await fetch(
+      "https://api.openai.com/v1/images/generations",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          Authorization:"Bearer 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"
+        },
+        body:JSON.stringify({
+          prompt:`${inputRef.current.value}`,
+          n:1,
+          size:"256x256",
+        }),
+      }
+    );
+    let data = await response.json();
+    let data_array = data.data;
+    setImage_url(data_array[0].url);
+    setLoading(false);
+  }
+  return (
+    <div className='ai-image-generator'>
+      <div className="header">Ai Image <span>Generator</span></div>
+      <div className="img-loading">
+        <div className="image"><img src={image_url==="/"?default_image:image_url} alt="" /></div>
+        <div className="loading">
+          <div className={loading?"loading-bar-full":"loding-bar"}></div>
+          <div className={loading?"loading-text":"display-none"}>Loading...</div>
+        </div>
+      </div>
+      <div className="search-box">
+        <input type="text" ref={inputRef} className='search-input' placeholder='Describe what you want to see' />
+        <div className="generate-btn" onClick={()=>{imageGenerator()}}>Generate</div>
+      </div>
+    </div>
+  )
+}
